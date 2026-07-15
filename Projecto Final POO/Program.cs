@@ -29,25 +29,189 @@ while (!salir)
     switch (opcion)
     {
         case 1:
-            break;
+            Console.Write("Placa: ");
+            string placa = Console.ReadLine();
+    
+            Console.Write("Marca: ");
+            string marca = Console.ReadLine();
+    
+            Console.Write("Color: ");
+            string color = Console.ReadLine();
+    
+            Vehiculo nuevo = new Vehiculo(placa, marca, color);
+        
+            vehiculos.Add(nuevo);
+        
+            Console.WriteLine("Vehículo agregado.");
+        break;
 
         case 2:
-            break;
+            Console.Write("Digite la placa: ");
+            placa = Console.ReadLine();
+        
+            bool encontrado = false;
+        
+            foreach (Vehiculo v in vehiculos)
+            {
+                if (v.Placa == placa)
+                {
+                    Console.WriteLine("Placa: " + v.Placa);
+                    Console.WriteLine("Marca: " + v.Marca);
+                    Console.WriteLine("Color: " + v.Color);
+        
+                    encontrado = true;
+                    break;
+                }
+            }
+        
+            if (encontrado == false)
+            {
+                Console.WriteLine("Vehículo no encontrado.");
+            }
+        break;
 
         case 3:
-            break;
+            Console.Write("Digite la placa: ");
+            placa = Console.ReadLine();
+        
+            encontrado = false;
+        
+            foreach (Vehiculo v in vehiculos)
+            {
+                if (v.Placa == placa)
+                {
+                    Console.Write("Nueva marca: ");
+                    v.Marca = Console.ReadLine();
+        
+                    Console.Write("Nuevo color: ");
+                    v.Color = Console.ReadLine();
+        
+                    Console.WriteLine("Vehículo modificado.");
+        
+                    encontrado = true;
+                    break;
+                 }
+                }
+            
+                if (encontrado == false)
+                {
+                    Console.WriteLine("Vehículo no encontrado.");
+                }
 
+        break;
+            
         case 4:
-            break;
+            Console.Write("Digite la placa: ");
+            placa = Console.ReadLine();
+        
+            encontrado = false;
+        
+            for (int i = 0; i < vehiculos.Count; i++)
+            {
+                if (vehiculos[i].Placa == placa)
+                {
+                    vehiculos.RemoveAt(i);
+        
+                    Console.WriteLine("Vehículo eliminado.");
+        
+                    encontrado = true;
+                    break;
+                }
+            }
+        
+            if (encontrado == false)
+            {
+                Console.WriteLine("Vehículo no encontrado.");
+            }
+        break;
 
         case 5:
-            break;
-
+          
+            if (vehiculos.Count == 0)
+            {
+                Console.WriteLine("No hay vehículos registrados.");
+            }
+            else
+            {
+                foreach (Vehiculo v in vehiculos)
+                {
+                    Console.WriteLine("--------------------------");
+                    Console.WriteLine("Placa: " + v.Placa);
+                    Console.WriteLine("Marca: " + v.Marca);
+                    Console.WriteLine("Color: " + v.Color);
+                }
+            }
+    
+        break;
+    
         case 6:
-            break;
+                Console.Write("Digite la placa: ");
+                placa = Console.ReadLine();
+            
+                Vehiculo vehiculo = null;
+            
+                foreach (Vehiculo v in vehiculos)
+                {
+                    if (v.Placa == placa)
+                    {
+                        vehiculo = v;
+                        break;
+                    }
+                }
+            
+                if (vehiculo == null)
+                {
+                    Console.WriteLine("Vehículo no encontrado.");
+                    break;
+                }
+            
+                foreach (EspacioParqueo e in espacios)
+                {
+                    if (e.Ocupado == false)
+                    {
+                        e.Ocupado = true;
+            
+                        Ticket ticket = new Ticket(vehiculo, e);
+            
+                        tickets.Add(ticket);
+            
+                        Console.WriteLine("Entrada registrada.");
+                        Console.WriteLine("Espacio asignado: " + e.Numero);
+            
+                        break;
+                    }
+                }
+        break;
 
         case 7:
-            break;
+                    Console.Write("Digite la placa: ");
+                    placa = Console.ReadLine();
+                
+                    encontrado = false;
+                
+                    foreach (Ticket t in tickets)
+                    {
+                        if (t.Vehiculo.Placa == placa && t.HoraSalida == DateTime.MinValue)
+                        {
+                            t.HoraSalida = DateTime.Now;
+                
+                            t.Espacio.Ocupado = false;
+                
+                            TimeSpan tiempo = t.HoraSalida - t.HoraEntrada;
+                
+                            Console.WriteLine("Salida registrada.");
+                            Console.WriteLine("Tiempo: " + tiempo.TotalMinutes + " minutos.");
+                
+                            encontrado = true;
+                            break;
+                        }
+                    }
+                
+                    if (encontrado == false)
+                    {
+                        Console.WriteLine("Ese vehículo no está parqueado.");
+                    }
+        break;
 
         case 8:
             salir = true;

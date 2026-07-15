@@ -86,3 +86,5 @@ switch (opcion)
         Console.WriteLine("Opcion no valida.");
         break;
 }
+
+// Pensar en mejoras

@@ -56,25 +56,6 @@ while (!salir)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 public class Vehiculo
 {
     public string Placa { get; set; }

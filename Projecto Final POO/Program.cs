@@ -262,6 +262,6 @@ public class Ticket
     }
 }
 
-
+// Debo revisarlo para pensar en buenas practicas como validaciones y unos cuentos ciclos While.
 
 

@@ -1,267 +1,190 @@
-﻿// Nombre: Adrian Paulino -- Matricula: 20251937
+﻿using SistemaControlParqueos;
 
-List<Vehiculo> vehiculos = new List<Vehiculo>();
-List<EspacioParqueo> espacios = new List<EspacioParqueo>();
+List<EspacioParqueo> espacios = new List<EspacioParqueo>
+{
+    new EspacioParqueo("A1"),
+    new EspacioParqueo("A2"),
+    new EspacioParqueo("A3"),
+    new EspacioParqueo("B1"),
+    new EspacioParqueo("B2")
+};
+
 List<Ticket> tickets = new List<Ticket>();
+int proximoNumeroTicket = 1;
+string opcion;
 
-for (int i = 1; i <= 10; i++)
+do
 {
-    espacios.Add(new EspacioParqueo(i));
-}
-
-
-bool salir = false;
-
-while (!salir)
-{
-    Console.WriteLine("===== SISTEMA DE CONTROL DE PARQUEOS =====");
-    Console.WriteLine("1. Agregar vehículo");
-    Console.WriteLine("2. Buscar vehículo");
-    Console.WriteLine("3. Modificar vehículo");
-    Console.WriteLine("4. Eliminar vehículo");
-    Console.WriteLine("5. Listar vehículos");
-    Console.WriteLine("6. Registrar entrada");
-    Console.WriteLine("7. Registrar salida");
-    Console.WriteLine("8. Salir");
-
-    int opcion = Convert.ToInt32(Console.ReadLine());
+    Console.Clear();
+    Console.WriteLine("=== SISTEMA DE CONTROL DE PARQUEOS ===");
+    Console.WriteLine("1. Registrar entrada de vehículo");
+    Console.WriteLine("2. Registrar salida de vehículo");
+    Console.WriteLine("3. Ver espacios de parqueo");
+    Console.WriteLine("4. Ver tickets activos");
+    Console.WriteLine("5. Ver todos los tickets");
+    Console.WriteLine("6. Salir");
+    Console.Write("Elige una opción: ");
+    opcion = Console.ReadLine() ?? "";
 
     switch (opcion)
     {
-        case 1:
-            Console.Write("Placa: ");
-            string placa = Console.ReadLine();
-    
-            Console.Write("Marca: ");
-            string marca = Console.ReadLine();
-    
-            Console.Write("Color: ");
-            string color = Console.ReadLine();
-    
-            Vehiculo nuevo = new Vehiculo(placa, marca, color);
-        
-            vehiculos.Add(nuevo);
-        
-            Console.WriteLine("Vehículo agregado.");
-        break;
-
-        case 2:
-            Console.Write("Digite la placa: ");
-            placa = Console.ReadLine();
-        
-            bool encontrado = false;
-        
-            foreach (Vehiculo v in vehiculos)
-            {
-                if (v.Placa == placa)
-                {
-                    Console.WriteLine("Placa: " + v.Placa);
-                    Console.WriteLine("Marca: " + v.Marca);
-                    Console.WriteLine("Color: " + v.Color);
-        
-                    encontrado = true;
-                    break;
-                }
-            }
-        
-            if (encontrado == false)
-            {
-                Console.WriteLine("Vehículo no encontrado.");
-            }
-        break;
-
-        case 3:
-            Console.Write("Digite la placa: ");
-            placa = Console.ReadLine();
-        
-            encontrado = false;
-        
-            foreach (Vehiculo v in vehiculos)
-            {
-                if (v.Placa == placa)
-                {
-                    Console.Write("Nueva marca: ");
-                    v.Marca = Console.ReadLine();
-        
-                    Console.Write("Nuevo color: ");
-                    v.Color = Console.ReadLine();
-        
-                    Console.WriteLine("Vehículo modificado.");
-        
-                    encontrado = true;
-                    break;
-                 }
-                }
-            
-                if (encontrado == false)
-                {
-                    Console.WriteLine("Vehículo no encontrado.");
-                }
-
-        break;
-            
-        case 4:
-            Console.Write("Digite la placa: ");
-            placa = Console.ReadLine();
-        
-            encontrado = false;
-        
-            for (int i = 0; i < vehiculos.Count; i++)
-            {
-                if (vehiculos[i].Placa == placa)
-                {
-                    vehiculos.RemoveAt(i);
-        
-                    Console.WriteLine("Vehículo eliminado.");
-        
-                    encontrado = true;
-                    break;
-                }
-            }
-        
-            if (encontrado == false)
-            {
-                Console.WriteLine("Vehículo no encontrado.");
-            }
-        break;
-
-        case 5:
-          
-            if (vehiculos.Count == 0)
-            {
-                Console.WriteLine("No hay vehículos registrados.");
-            }
-            else
-            {
-                foreach (Vehiculo v in vehiculos)
-                {
-                    Console.WriteLine("--------------------------");
-                    Console.WriteLine("Placa: " + v.Placa);
-                    Console.WriteLine("Marca: " + v.Marca);
-                    Console.WriteLine("Color: " + v.Color);
-                }
-            }
-    
-        break;
-    
-        case 6:
-                Console.Write("Digite la placa: ");
-                placa = Console.ReadLine();
-            
-                Vehiculo vehiculo = null;
-            
-                foreach (Vehiculo v in vehiculos)
-                {
-                    if (v.Placa == placa)
-                    {
-                        vehiculo = v;
-                        break;
-                    }
-                }
-            
-                if (vehiculo == null)
-                {
-                    Console.WriteLine("Vehículo no encontrado.");
-                    break;
-                }
-            
-                foreach (EspacioParqueo e in espacios)
-                {
-                    if (e.Ocupado == false)
-                    {
-                        e.Ocupado = true;
-            
-                        Ticket ticket = new Ticket(vehiculo, e);
-            
-                        tickets.Add(ticket);
-            
-                        Console.WriteLine("Entrada registrada.");
-                        Console.WriteLine("Espacio asignado: " + e.Numero);
-            
-                        break;
-                    }
-                }
-        break;
-
-        case 7:
-                    Console.Write("Digite la placa: ");
-                    placa = Console.ReadLine();
-                
-                    encontrado = false;
-                
-                    foreach (Ticket t in tickets)
-                    {
-                        if (t.Vehiculo.Placa == placa && t.HoraSalida == DateTime.MinValue)
-                        {
-                            t.HoraSalida = DateTime.Now;
-                
-                            t.Espacio.Ocupado = false;
-                
-                            TimeSpan tiempo = t.HoraSalida - t.HoraEntrada;
-                
-                            Console.WriteLine("Salida registrada.");
-                            Console.WriteLine("Tiempo: " + tiempo.TotalMinutes + " minutos.");
-                
-                            encontrado = true;
-                            break;
-                        }
-                    }
-                
-                    if (encontrado == false)
-                    {
-                        Console.WriteLine("Ese vehículo no está parqueado.");
-                    }
-        break;
-
-        case 8:
-            salir = true;
+        case "1":
+            RegistrarEntrada(espacios, tickets, ref proximoNumeroTicket);
+            break;
+        case "2":
+            RegistrarSalida(tickets);
+            break;
+        case "3":
+            MostrarEspacios(espacios);
+            break;
+        case "4":
+            MostrarTicketsActivos(tickets);
+            break;
+        case "5":
+            MostrarTodosLosTickets(tickets);
+            break;
+        case "6":
+            Console.WriteLine("Programa finalizado.");
+            break;
+        default:
+            Console.WriteLine("Opción no válida.");
+            Pausar();
             break;
     }
 }
+while (opcion != "6");
 
-
-public class Vehiculo
+static void RegistrarEntrada(List<EspacioParqueo> espacios, List<Ticket> tickets, ref int proximoNumeroTicket)
 {
-    public string Placa { get; set; }
-    public string Marca { get; set; }
-    public string Color { get; set; }
+    EspacioParqueo? espacioDisponible = espacios.Find(espacio => !espacio.EstaOcupado);
 
-    public Vehiculo(string placa, string marca, string color)
+    if (espacioDisponible == null)
     {
-        Placa = placa;
-        Marca = marca;
-        Color = color;
+        Console.WriteLine("No hay espacios disponibles.");
+        Pausar();
+        return;
     }
+
+    Console.Clear();
+    Console.WriteLine("=== REGISTRAR ENTRADA ===");
+    Console.Write("Placa: ");
+    string placa = Console.ReadLine() ?? "";
+
+    Ticket? ticketExistente = tickets.Find(ticket =>
+        ticket.Vehiculo.Placa.Equals(placa, StringComparison.OrdinalIgnoreCase) && ticket.HoraSalida == null);
+
+    if (ticketExistente != null)
+    {
+        Console.WriteLine("Este vehículo ya tiene una entrada activa.");
+        Pausar();
+        return;
+    }
+
+    Console.Write("Marca: ");
+    string marca = Console.ReadLine() ?? "";
+    Console.Write("Color: ");
+    string color = Console.ReadLine() ?? "";
+
+    Vehiculo vehiculo = new Vehiculo(placa, marca, color);
+    espacioDisponible.Ocupar();
+
+    Ticket ticket = new Ticket(proximoNumeroTicket, vehiculo, espacioDisponible);
+    tickets.Add(ticket);
+    proximoNumeroTicket++;
+
+    Console.WriteLine($"\nEntrada registrada. Espacio asignado: {espacioDisponible.Numero}");
+    Console.WriteLine($"Número de ticket: {ticket.Numero}");
+    Pausar();
 }
 
-public class EspacioParqueo
+static void RegistrarSalida(List<Ticket> tickets)
 {
-    public int Numero { get; set; }
-    public bool Ocupado { get; set; }
+    Console.Clear();
+    Console.WriteLine("=== REGISTRAR SALIDA ===");
+    Console.Write("Escribe el número de ticket: ");
 
-    public EspacioParqueo(int numero)
+    if (!int.TryParse(Console.ReadLine(), out int numeroTicket))
     {
-        Numero = numero;
-        Ocupado = false;
+        Console.WriteLine("Debes escribir un número válido.");
+        Pausar();
+        return;
     }
+
+    Ticket? ticket = tickets.Find(ticket => ticket.Numero == numeroTicket && ticket.HoraSalida == null);
+
+    if (ticket == null)
+    {
+        Console.WriteLine("No se encontró un ticket activo con ese número.");
+        Pausar();
+        return;
+    }
+
+    ticket.RegistrarSalida();
+    ticket.Espacio.Liberar();
+
+    Console.WriteLine("\nSalida registrada correctamente.");
+    ticket.MostrarDatos();
+    Pausar();
 }
 
-public class Ticket
+static void MostrarEspacios(List<EspacioParqueo> espacios)
 {
-    public Vehiculo Vehiculo { get; set; }
-    public EspacioParqueo Espacio { get; set; }
+    Console.Clear();
+    Console.WriteLine("=== ESPACIOS DE PARQUEO ===");
 
-    public DateTime HoraEntrada { get; set; }
-    public DateTime HoraSalida { get; set; }
-
-    public Ticket(Vehiculo vehiculo, EspacioParqueo espacio)
+    foreach (EspacioParqueo espacio in espacios)
     {
-        Vehiculo = vehiculo;
-        Espacio = espacio;
-        HoraEntrada = DateTime.Now;
+        espacio.MostrarEstado();
     }
+
+    Pausar();
 }
 
-// Debo revisarlo para pensar en buenas practicas como validaciones y unos cuentos ciclos While.
+static void MostrarTicketsActivos(List<Ticket> tickets)
+{
+    Console.Clear();
+    Console.WriteLine("=== TICKETS ACTIVOS ===");
+    List<Ticket> ticketsActivos = tickets.FindAll(ticket => ticket.HoraSalida == null);
 
+    if (ticketsActivos.Count == 0)
+    {
+        Console.WriteLine("No hay vehículos dentro del parqueo.");
+    }
+    else
+    {
+        foreach (Ticket ticket in ticketsActivos)
+        {
+            ticket.MostrarDatos();
+            Console.WriteLine();
+        }
+    }
 
+    Pausar();
+}
+
+static void MostrarTodosLosTickets(List<Ticket> tickets)
+{
+    Console.Clear();
+    Console.WriteLine("=== TODOS LOS TICKETS ===");
+
+    if (tickets.Count == 0)
+    {
+        Console.WriteLine("Aún no se han creado tickets.");
+    }
+    else
+    {
+        foreach (Ticket ticket in tickets)
+        {
+            ticket.MostrarDatos();
+            Console.WriteLine();
+        }
+    }
+
+    Pausar();
+}
+
+static void Pausar()
+{
+    Console.WriteLine("Presiona una tecla para continuar...");
+    Console.ReadKey();
+}

@@ -1,16 +1,7 @@
-﻿using SistemaControlParqueos;
+﻿using System.Data.SqlClient;
+using SistemaControlParqueos;
 
-List<EspacioParqueo> espacios = new List<EspacioParqueo>
-{
-    new EspacioParqueo("A1"),
-    new EspacioParqueo("A2"),
-    new EspacioParqueo("A3"),
-    new EspacioParqueo("B1"),
-    new EspacioParqueo("B2")
-};
-
-List<Ticket> tickets = new List<Ticket>();
-int proximoNumeroTicket = 1;
+ParqueoRepository repositorio = new ParqueoRepository();
 string opcion;
 
 do
@@ -26,57 +17,64 @@ do
     Console.Write("Elige una opción: ");
     opcion = Console.ReadLine() ?? "";
 
-    switch (opcion)
+    try
     {
-        case "1":
-            RegistrarEntrada(espacios, tickets, ref proximoNumeroTicket);
-            break;
-        case "2":
-            RegistrarSalida(tickets);
-            break;
-        case "3":
-            MostrarEspacios(espacios);
-            break;
-        case "4":
-            MostrarTicketsActivos(tickets);
-            break;
-        case "5":
-            MostrarTodosLosTickets(tickets);
-            break;
-        case "6":
-            Console.WriteLine("Programa finalizado.");
-            break;
-        default:
-            Console.WriteLine("Opción no válida.");
-            Pausar();
-            break;
+        switch (opcion)
+        {
+            case "1":
+                RegistrarEntrada(repositorio);
+                break;
+            case "2":
+                RegistrarSalida(repositorio);
+                break;
+            case "3":
+                MostrarEspacios(repositorio);
+                break;
+            case "4":
+                MostrarTickets(repositorio.ObtenerTicketsActivos(), "TICKETS ACTIVOS");
+                break;
+            case "5":
+                MostrarTickets(repositorio.ObtenerTodosLosTickets(), "TODOS LOS TICKETS");
+                break;
+            case "6":
+                Console.WriteLine("Programa finalizado.");
+                break;
+            default:
+                Console.WriteLine("Opción no válida.");
+                Console.WriteLine("Presiona una tecla para continuar...");
+                Console.ReadKey();
+                break;
+        }
+    }
+    catch (SqlException ex)
+    {
+        Console.WriteLine($"Error al conectar con SQL Server: {ex.Message}");
+        Console.WriteLine("Presiona una tecla para continuar...");
+        Console.ReadKey();
     }
 }
 while (opcion != "6");
 
-static void RegistrarEntrada(List<EspacioParqueo> espacios, List<Ticket> tickets, ref int proximoNumeroTicket)
+static void RegistrarEntrada(ParqueoRepository repositorio)
 {
-    EspacioParqueo? espacioDisponible = espacios.Find(espacio => !espacio.EstaOcupado);
-
-    if (espacioDisponible == null)
-    {
-        Console.WriteLine("No hay espacios disponibles.");
-        Pausar();
-        return;
-    }
-
     Console.Clear();
     Console.WriteLine("=== REGISTRAR ENTRADA ===");
     Console.Write("Placa: ");
     string placa = Console.ReadLine() ?? "";
 
-    Ticket? ticketExistente = tickets.Find(ticket =>
-        ticket.Vehiculo.Placa.Equals(placa, StringComparison.OrdinalIgnoreCase) && ticket.HoraSalida == null);
+    if (string.IsNullOrWhiteSpace(placa))
+    {
+        Console.WriteLine("La placa es obligatoria.");
+        Console.WriteLine("Presiona una tecla para continuar...");
+        Console.ReadKey();
+        return;
+    }
 
-    if (ticketExistente != null)
+    if (repositorio.ExisteTicketActivo(placa))
     {
         Console.WriteLine("Este vehículo ya tiene una entrada activa.");
-        Pausar();
+        Console.WriteLine("Presiona una tecla para continuar...");
+        Console.ReadKey();
         return;
     }
 
@@ -85,91 +83,76 @@ static void RegistrarEntrada(List<EspacioParqueo> espacios, List<Ticket> tickets
     Console.Write("Color: ");
     string color = Console.ReadLine() ?? "";
 
-    Vehiculo vehiculo = new Vehiculo(placa, marca, color);
-    espacioDisponible.Ocupar();
+    Ticket? ticket = repositorio.RegistrarEntrada(placa, marca, color);
 
-    Ticket ticket = new Ticket(proximoNumeroTicket, vehiculo, espacioDisponible);
-    tickets.Add(ticket);
-    proximoNumeroTicket++;
+    if (ticket == null)
+    {
+        Console.WriteLine("No hay espacios disponibles.");
+    }
+    else
+    {
+        Console.WriteLine("\nEntrada registrada correctamente.");
+        ticket.MostrarDatos();
+    }
 
-    Console.WriteLine($"\nEntrada registrada. Espacio asignado: {espacioDisponible.Numero}");
-    Console.WriteLine($"Número de ticket: {ticket.Numero}");
-    Pausar();
+    Console.WriteLine("\nPresiona una tecla para continuar...");
+    Console.ReadKey();
 }
 
-static void RegistrarSalida(List<Ticket> tickets)
+static void RegistrarSalida(ParqueoRepository repositorio)
 {
     Console.Clear();
     Console.WriteLine("=== REGISTRAR SALIDA ===");
     Console.Write("Escribe el número de ticket: ");
 
-    if (!int.TryParse(Console.ReadLine(), out int numeroTicket))
+    if (!int.TryParse(Console.ReadLine(), out int ticketId))
     {
         Console.WriteLine("Debes escribir un número válido.");
-        Pausar();
+        Console.WriteLine("Presiona una tecla para continuar...");
+        Console.ReadKey();
         return;
     }
 
-    Ticket? ticket = tickets.Find(ticket => ticket.Numero == numeroTicket && ticket.HoraSalida == null);
+    Ticket? ticket = repositorio.RegistrarSalida(ticketId);
 
     if (ticket == null)
     {
         Console.WriteLine("No se encontró un ticket activo con ese número.");
-        Pausar();
-        return;
+    }
+    else
+    {
+        Console.WriteLine("\nSalida registrada correctamente.");
+        ticket.MostrarDatos();
     }
 
-    ticket.RegistrarSalida();
-    ticket.Espacio.Liberar();
-
-    Console.WriteLine("\nSalida registrada correctamente.");
-    ticket.MostrarDatos();
-    Pausar();
+    Console.WriteLine("\nPresiona una tecla para continuar...");
+    Console.ReadKey();
 }
 
-static void MostrarEspacios(List<EspacioParqueo> espacios)
+static void MostrarEspacios(ParqueoRepository repositorio)
 {
     Console.Clear();
     Console.WriteLine("=== ESPACIOS DE PARQUEO ===");
+
+    List<EspacioParqueo> espacios = repositorio.ObtenerEspacios();
 
     foreach (EspacioParqueo espacio in espacios)
     {
         espacio.MostrarEstado();
     }
 
-    Pausar();
+    Console.WriteLine("\nPresiona una tecla para continuar...");
+    Console.ReadKey();
 }
 
-static void MostrarTicketsActivos(List<Ticket> tickets)
+static void MostrarTickets(List<Ticket> tickets, string titulo)
 {
     Console.Clear();
-    Console.WriteLine("=== TICKETS ACTIVOS ===");
-    List<Ticket> ticketsActivos = tickets.FindAll(ticket => ticket.HoraSalida == null);
-
-    if (ticketsActivos.Count == 0)
-    {
-        Console.WriteLine("No hay vehículos dentro del parqueo.");
-    }
-    else
-    {
-        foreach (Ticket ticket in ticketsActivos)
-        {
-            ticket.MostrarDatos();
-            Console.WriteLine();
-        }
-    }
-
-    Pausar();
-}
-
-static void MostrarTodosLosTickets(List<Ticket> tickets)
-{
-    Console.Clear();
-    Console.WriteLine("=== TODOS LOS TICKETS ===");
+    Console.WriteLine($"=== {titulo} ===");
 
     if (tickets.Count == 0)
     {
-        Console.WriteLine("Aún no se han creado tickets.");
+        Console.WriteLine("No hay tickets para mostrar.");
     }
     else
     {
@@ -180,11 +163,6 @@ static void MostrarTodosLosTickets(List<Ticket> tickets)
         }
     }
 
-    Pausar();
-}
-
-static void Pausar()
-{
     Console.WriteLine("Presiona una tecla para continuar...");
     Console.ReadKey();
 }
